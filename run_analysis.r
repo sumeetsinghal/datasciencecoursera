@@ -35,10 +35,50 @@ processeachDir <- function(path, fileName, aggdataf) {
   
   newdataf
   if(nrow(aggdataf) ==0) {
-    aggdataf 
+    aggdataf <- newdataf
+  else   
+      aggdataf <- cbind(aggdataf, newdataf)
+   aggdataf
+    
+}
+
+# traverse through all the directory and process each file
+  findallpath <- function(path, aggdataf1) {
+    fs <- list.file(path)
+    for(fileName in fs) {
+      if(dir.exists(fileName))
+        aggdataf1 <- findallpath(paste0(path,"/",fileName), aggdataf1)
+      else   
+         aggdataf1 <- processeachDir(path,fileName,aggdataf1)
+         aggdataf1
+    }
+       aggdataf1
+   }
+
   
+  # this is execution of the main code
   
+  #aggregate the training data
+  setwd("c:/workarea/train")
+  path <- "c:/workarea/train"
+  aggdataf2 <- data.frame()
+  aggdataf1 <- data.frame()
+  aggdataf1 <- findallpath(path,aggdataf2)
   
+  #aggregate the test data
+  setwd("c:/workarea/test")
+  path <- "c:/workarea/test"
+  aggdataf3 <- data.frame()
+  aggdataf4 <- data.frame()
+  aggdataf3 <- findallpath(path,aggdataf4)
+    
+  #Merging both data
+  aggdataf5 <- data.frame()
+  aggdataf5 <- rbind(aggdataf1,aggdataf3)
+  aggdataf5
+  
+  # aggregate group by the subject
+  aggdata <- aggdataf5 %>% group_by(mean_subject)
 
 
 

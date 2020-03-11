@@ -53,9 +53,9 @@ library(dplyr)
   data_file10[, "Activity"] <- newlabel
   data_file10
   
- # group by activity and subject                     
-  aggdata <- data_file10 %>% group_by(Subject, Activity)
-  aggdata
+  # group by activity and subject                     
+  #creates a aggregate data set with the average of each variable for each activity and each subject.
+  aggdata <- aggregate(data_file10, list(data_file10$Subject,data_file10$Activity), FUN = mean)  aggdata
  
  #write to file                     
   path <- "/Users/sumeetsinghal/sumeet/Coursera/datacleaningweek4/UCIHARDataset"

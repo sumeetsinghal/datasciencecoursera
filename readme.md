@@ -1,17 +1,29 @@
 Description of all variables used in program
 
 activity - variable that holds the activity
+
 features - variable that holds the features
+
 data_file1 - holding the x axis test data
+
 data_file2 - holding the y axis test data
+
 data_file3 - holds subject test data
+
 data_file4 - merged data from test files 
+
 data_file5 - holding the x axis test data
+
 data_file6 - holding the y axis test data
+
 data_file7 - holds subject test data
+
 data_file8 - merged data from test files 
+
 data_file9 - merged data of test and train files
+
 data_file10 - data with the header names and filtered by mean and Standard deviation
+
 aggdata - aggregated data by average
 
 Here are the list of process that was applied:

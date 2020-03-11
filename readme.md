@@ -1,4 +1,5 @@
 Description of all variables used in program
+
 activity - variable that holds the activity
 features - variable that holds the features
 data_file1 - holding the x axis test data

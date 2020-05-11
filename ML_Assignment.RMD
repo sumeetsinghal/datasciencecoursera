@@ -1,0 +1,111 @@
+
+```{r echo = FALSE}
+library(ggplot2)
+library(Hmisc)
+library(caret)
+library(bestglm) 
+library(readr) 
+library(e1071)
+#library(gbm)
+#install.packages("Quandl")
+#install.packages("forecast")
+library(randomForest)
+library(quantmod)
+library(Quandl)
+#install.packages('tidyverse', dependencies = TRUE)
+library(forecast)
+library(tidyverse)
+library(caret)
+library(glmnet)
+library(parallel)
+library(doParallel)
+
+```
+# Load the data  
+```{r echo = FALSE}
+
+path <- "/Users/sumeetsinghal/sumeet/Coursera/Machinelearning"
+setwd(path)
+getwd()
+#setwd("C:\\Sumeet\\Visa\\Knowledge\\Coursera\\datascience\\MachineLearning")
+exercise.train <- data.frame(read_csv("pml-training.csv") )
+
+
+exercise.test <- data.frame(read_csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"))
+
+```
+
+#Cleanup of data
+Removing NA and initail columns from the data
+
+```{r echo = FALSE}
+
+exercise.train <- exercise.train[1000:15000,c(7:160)]
+
+exercise.train[is.na(exercise.train)] <- 0
+exercise.test[is.na(exercise.test)] <- 0
+
+
+
+```
+
+# Use regularized regression to fit the model
+identify the critical variables to be included in the model
+
+```{r echo = FALSE}
+
+
+x <- model.matrix(factor(classe) ~., exercise.train)[,-1]# Outcome variable
+y <- exercise.train$classe
+cv <- glmnet(x, factor(y), alpha = 1,family = "multinomial")
+plot(cv)
+
+coef(cv,s=0.05)
+#cvfit <- cv.glmnet(x,y)
+#cvfit$lambda.min
+#cv$lambda
+
+```
+
+# Train the Model with Random forest, gbm and lda
+Include only the variables that will make difference to the model.extract
+
+```{r echo = FALSE}
+
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OSregisterDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv",number = 5, allowParallel = TRUE)
+
+exercise.train <- exercise.train[1000:15000,c('magnet_arm_x','magnet_dumbbell_x','magnet_dumbbell_z','pitch_forearm','total_accel_forearm','magnet_arm_z','accel_dumbbell_x','accel_dumbbell_y','magnet_dumbbell_x','roll_dumbbell','pitch_dumbbell','yaw_dumbbell','roll_forearm','accel_forearm_y', 'classe')]
+
+exercise.test <- exercise.test[,c('magnet_arm_x','magnet_dumbbell_x','magnet_dumbbell_z','pitch_forearm','total_accel_forearm','magnet_arm_z','accel_dumbbell_x','accel_dumbbell_y','magnet_dumbbell_x','roll_dumbbell','pitch_dumbbell','yaw_dumbbell','roll_forearm','accel_forearm_y')]
+
+model_rf <- randomForest(factor(classe)~.,data=exercise.train,importance=TRUE,proximity=TRUE, na.action=na.roughfix, trControl = fitControl)
+
+model_gbm <- train(factor(classe)~., exercise.train, method='gbm', na.action = na.omit , trControl = fitControl)
+model_lda <- train(factor(classe)~., exercise.train, method='lda', na.action = na.omit, trControl = fitControl)
+
+stopCluster(cluster)
+registerDoSEQ()
+
+```
+# prediction on training data
+
+```{r echo = FALSE}
+
+pred_rf <- predict(model_rf, exercise.test)
+print("Prediction as per RF")
+pred_rf
+pred_gbm <- predict(model_gbm, exercise.test)
+print("Prediction as per gbm")
+pred_gbm
+pred_lda <- predict(model_lda, exercise.test)
+print("Prediction as per lda")
+pred_lda
+
+```
+#Conclusion
+
+Training data required cleaned as it has NA, it was cleanup. Since data was large with lots of variable it would take lot of time to train
+Some of the variables may have little impct, we can remove them from the model training. 
+Train and model and use it to predict the classe.
